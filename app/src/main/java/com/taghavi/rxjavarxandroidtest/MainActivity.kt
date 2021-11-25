@@ -8,11 +8,15 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
+
+    private val disposable = CompositeDisposable()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         taskObservable.subscribe(object : Observer<Task> {
             override fun onSubscribe(d: Disposable?) {
                 Log.d(TAG, "onSubscribe: Called")
+                disposable.add(d)
             }
 
             override fun onNext(task: Task) {
@@ -34,9 +39,15 @@ class MainActivity : AppCompatActivity() {
             override fun onError(e: Throwable?) {
                 Log.d(TAG, "onError: $e")
             }
+
             override fun onComplete() {
                 Log.d(TAG, "onComplete: Called")
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.clear()
     }
 }
